@@ -1,15 +1,15 @@
-begin
 
-s = 0
+class C {
+    x = null
+}
 
-for (i=10000 ; i < 20000 ; i = i + 1) then 
-    a = i mod 10
-    b = int(i / 100) mod 10
-    if a == b then
-        s = s + 1
-    endif
-end
+arr = [1, 2, 3]
 
-print "相同的有:" ; s
+func f(n: Integer): Tuple {
+    return n + 1, n + 2, n + 3
+}
 
-end
+a, arr[2], C.x = f(7)
+
+print a, C.x, arr
+

@@ -1,0 +1,9 @@
+begin
+
+try {
+    import 'c'
+} catch _ {
+    import 'c'
+}
+
+end

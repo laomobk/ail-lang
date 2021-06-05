@@ -1,30 +1,27 @@
-print_expr := 'PRINT' expr [';' expr]* NEWLINE
-input_expr := 'INPUT' expr ';' val_list NEWLINE
+print_expr := 'print' expr [';' expr]* NEWLINE
+input_expr := 'input' expr ';' val_list NEWLINE
 
 assi_expr := NAME '=' expr NEWLINE
-call_expr := NAME '(' arg_list ')' NEWLINE
 
  if_else_expr := 'if' test 'then' NEWLINE
-	BLOCK
-	(
-	 'else' NEWLINE
-	 BLOCK
-	)
-	'endif'
+    BLOCK
+    ['elif' test NEWLINE BLOCK]* 
+    ['else' BLOCK]
+'endif'
 
 
-while_expr := 'while' test NEWLINE
-	      BLOCK
-	      'wend' NEWLINE
+while_expr := 'while' test
+	block
+'wend' 
 
-do_loop_expr := 'do' NEWLINE
-		BLOCK
-		'loop' 'until' test NEWLINE
+do_loop_expr := 'do'
+	block
+'loop' 'until' test
 
 
-func_def := 'fun' NAME '(' arg_list ')' NEWLINE
-		BLOCK
-	    'end'
+func_def := 'fun' NAME '(' arg_list ')' 'is'
+	block
+'end'
 
 test := or_test
 or_test := and_test ['or' and_test]*
@@ -33,16 +30,15 @@ not_test := 'not' cmp_test
 cmp_test := expr [cmp_op expr]* 
 cmp_op := '>' | '<' | '=' | '!=' | '>=' | '<='
 
-# expr := real_expr | '(' expr ')'
 real_expr_list := real_expr [ ',' real_expr]*
 real_expr := md_expr [('+' | '-') md_expr]*
 md_expr := mod_expr [('*' | '/') mod_expr]*
-mod_expr := pow_expr ['MOD' pow_expr]*
+mod_expr := pow_expr ['mod' pow_expr]*
 pow_expr := cell ['^' cell]*
 cell := NUMBER | NAME | STRING | call_expr | '(' real_expr ')' | array
         member_expr
 call_expr := NAME '(' arg_list ')'
-arg_list := expr [',' expr]*
+arg_list := NAME [',' NAME]* [',' '*' NAME]
 
 val_list := NAME [',' NAME]*
 
@@ -52,11 +48,11 @@ assi_expr := cell '=' expr NEWLINE
 assi_expr_list := assi_expr [ ',' assi_expr]*
 
 stmt := while_expr | if_expr | if_else_expr | do_loop_expr | def_expr |
-	print_expr | input_expr
+	print_expr | input_expr | load_stmt | import_stmt
 
-BLOCK := stmt*
+block := stmt*
 
-program := BLOCK 'END'
+program := block 'end'
 
 continue_stmt := 'continue'
 break_stmt := 'break'
@@ -66,26 +62,28 @@ array := '{' item_list '}'
 item_list := cell [',' cell]*
 
 load_stmt := 'load' STRING
+import_stmt := 'import' [NAME] STRING
 
 member_expr := cell '.' NAME
 
-struct_def := 'struct' NAME 'is' NEWLINE
-                NAME NEWLINE [NAME NEWLINE]*
+struct_def := 'struct' NAME 'is'
+                NAME 
+                NAME*
                'end'
 
-for_stmt := 'for' '(' assi_expr_list | NONE ';'
-                                test | NONE ';'
-                                real_expr_list | NONE ')' 'then' NEWLINE
-             BLOCK
-             'end'
+for_stmt := 'for' '(' assi_expr_list? ';'
+                                test? ';'
+                                real_expr_list? ')' 'then'
+             block
+            'end'
 
 throw_expr := 'throw' real_expr
 assert_expr := 'assert' real_expr
 
 try_catch_expr := 'try' NEWLINE
-                    BLOCK
+                    block
                   'catch' NAME 'then'
-                    BLOCK
+                    block
                   'finally' then
-                    BLOCK
+                    block
                   'end'
